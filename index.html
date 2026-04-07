@@ -1448,7 +1448,7 @@ function getQualification(revenue, phone, email){
   if(!phone || !isValidPhone(phone)) return 'junk';
   const highRevenue = ['20_50cr','50_100cr','100cr_plus'];
   if(highRevenue.includes(revenue)) return 'qualified';
-  return 'newsletter';
+  return 'unqualified';
 }
 
 async function submitToOdoo(user, dimScores, totalPct, scoreLabel){
