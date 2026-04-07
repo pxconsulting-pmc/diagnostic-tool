@@ -5,7 +5,7 @@
 
 const https = require('https');
 
-const ODOO_BASE_URL = 'pxconsulting.odoo.com';
+const ODOO_BASE_URL = 'am595a.odoo.com';
 const ODOO_DB       = 'px-consulting';
 const STAGE_ID      = 1;
 
