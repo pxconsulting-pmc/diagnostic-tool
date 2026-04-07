@@ -138,7 +138,7 @@ exports.handler = async (event) => {
     x_total_score:   payload.totalPct      || 0,
     x_dim_scores:    payload.dimScoresText || '',
     x_weakest_dim:   payload.weakestDim    || '',
-    x_qualification: payload.qualification || 'junk',
+    x_qualification: payload.qualification || 'unqualified',
   };
 
   try {
