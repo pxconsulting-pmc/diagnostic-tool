@@ -109,7 +109,8 @@ export default async function handler(req, res) {
   }
 
   // Step 2 — Create lead
-  const leadData = {
+  // Build lead — only include fields with actual values to avoid XML struct errors
+  const rawLead = {
     name:            `[Diagnostic] ${payload.name}${payload.company ? ' — ' + payload.company : ''}`,
     contact_name:    payload.name,
     partner_name:    payload.company     || '',
@@ -124,6 +125,11 @@ export default async function handler(req, res) {
     x_weakest_dim:   payload.weakestDim    || '',
     x_qualification: payload.qualification || 'unqualified',
   };
+
+  // Strip empty strings — they cause malformed XML structs
+  const leadData = Object.fromEntries(
+    Object.entries(rawLead).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+  );
 
   try {
     const createXml = xmlCall('execute_kw', [
