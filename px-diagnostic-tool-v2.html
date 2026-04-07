@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PX Business Health Check — Free Diagnostic</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ─── ODOO CONFIG — edit these before deploying ─── */
+/* See JS CONFIG block below */
+
+:root{
+  /* Brand */
+  --bg:#0c0c09;
+  --bg2:#141410;
+  --bg3:#1c1c17;
+  --bg4:#242420;
+  --ink:#f2ead8;
+  --ink2:#d4cbb5;
+  --muted:#8a8470;
+  --border:rgba(212,168,71,0.15);
+  --border2:rgba(212,168,71,0.08);
+  --gold:#d4a847;
+  --gold2:#e8c06a;
+  --gold-bg:rgba(212,168,71,0.06);
+  --gold-border:rgba(212,168,71,0.2);
+  --cream:#f2ead8;
+
+  /* Dimension colours — adjusted for dark bg */
+  --s0:#5b8dd9; /* ops — structure */
+  --s1:#5ab87a; /* people — accountability */
+  --s2:#d4a847; /* financial — gold */
+  --s3:#b47ade; /* process — consistency */
+  --s4:#5abfce; /* leadership — bandwidth */
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  line-height:1.65;
+  min-height:100vh;
+}
+
+/* ─── SCREENS ─── */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ─── WELCOME SCREEN ─── */
+#screen-welcome{
+  min-height:100vh;
+  display:none;
+  flex-direction:column;
+}
+#screen-welcome.active{display:flex;}
+
+.welcome-hero{
+  flex:1;
+  display:flex;flex-direction:column;
+  justify-content:center;
+  padding:5rem 2rem 4rem;
+  max-width:680px;
+  margin:0 auto;
+  width:100%;
+}
+
+.px-logo{
+  font-family:'DM Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.32em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:3rem;
+  opacity:0.8;
+}
+
+.welcome-hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.6rem,6vw,4.2rem);
+  font-weight:900;line-height:1.02;
+  letter-spacing:-0.025em;
+  color:var(--cream);
+  margin-bottom:1.75rem;
+}
+
+.welcome-hero h1 em{
+  font-style:italic;color:var(--gold);
+}
+
+.welcome-hero p{
+  font-size:1rem;color:var(--ink2);
+  line-height:1.8;margin-bottom:2.5rem;
+  max-width:520px;
+}
+
+.welcome-hero p strong{color:var(--cream);font-weight:400;}
+
+.meta-row{
+  display:flex;gap:2rem;flex-wrap:wrap;
+  margin-bottom:3rem;
+}
+
+.meta-item{
+  display:flex;align-items:center;gap:0.5rem;
+  font-size:0.78rem;color:var(--muted);
+  font-family:'DM Mono',monospace;
+  letter-spacing:0.05em;
+}
+
+.meta-item span{
+  color:var(--gold);
+}
+
+.btn-primary{
+  display:inline-flex;align-items:center;gap:0.85rem;
+  padding:1.05rem 2.25rem;
+  background:var(--gold);
+  color:var(--bg);
+  font-size:0.85rem;font-weight:500;
+  letter-spacing:0.04em;
+  cursor:pointer;border:none;
+  transition:background 0.2s,transform 0.1s;
+  font-family:'DM Sans',sans-serif;
+  text-transform:uppercase;
+}
+
+.btn-primary:hover{background:var(--gold2);}
+.btn-primary:active{transform:scale(0.99);}
+
+.btn-primary .arrow{
+  font-size:1rem;
+  transition:transform 0.2s;
+}
+
+.btn-primary:hover .arrow{transform:translateX(4px);}
+
+.welcome-footer{
+  padding:1.5rem 2rem;
+  border-top:1px solid var(--border2);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:0.5rem;
+  font-family:'DM Mono',monospace;
+  font-size:0.52rem;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--muted);
+  max-width:680px;margin:0 auto;width:100%;
+}
+
+/* ─── ASSESSMENT SCREEN ─── */
+#screen-assessment{
+  min-height:100vh;
+  display:none;flex-direction:column;
+}
+#screen-assessment.active{display:flex;}
+
+/* PROGRESS BAR */
+.progress-bar{
+  position:sticky;top:0;z-index:100;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border2);
+}
+
+.progress-track{
+  height:2px;
+  background:var(--bg4);
+  position:relative;
+}
+
+.progress-fill{
+  height:100%;
+  background:var(--gold);
+  transition:width 0.4s ease;
+}
+
+.progress-info{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0.75rem 2rem;
+  max-width:680px;margin:0 auto;width:100%;
+}
+
+.progress-label{
+  font-family:'DM Mono',monospace;
+  font-size:0.55rem;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+.progress-num{
+  font-family:'DM Mono',monospace;
+  font-size:0.62rem;color:var(--gold);
+  letter-spacing:0.1em;
+}
+
+/* DIMENSION INDICATOR */
+.dimension-bar{
+  background:var(--bg3);
+  padding:0.55rem 2rem;
+  border-bottom:1px solid var(--border2);
+}
+
+.dimension-bar-inner{
+  max-width:680px;margin:0 auto;
+  display:flex;align-items:center;gap:0.75rem;
+}
+
+.dimension-dot{
+  width:6px;height:6px;border-radius:50%;
+  flex-shrink:0;
+}
+
+.dimension-name{
+  font-family:'DM Mono',monospace;
+  font-size:0.55rem;letter-spacing:0.2em;
+  text-transform:uppercase;
+}
+
+/* QUESTION AREA */
+.question-area{
+  flex:1;
+  padding:3.5rem 2rem;
+  max-width:680px;
+  margin:0 auto;
+  width:100%;
+}
+
+.question-num{
+  font-family:'DM Mono',monospace;
+  font-size:0.55rem;letter-spacing:0.28em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:1.25rem;
+}
+
+.question-text{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.2rem,2.5vw,1.65rem);
+  font-weight:700;line-height:1.35;
+  margin-bottom:0.75rem;
+  color:var(--cream);
+}
+
+.question-sub{
+  font-size:0.83rem;color:var(--muted);
+  margin-bottom:2.25rem;line-height:1.65;
+  font-style:italic;
+}
+
+/* ANSWER OPTIONS */
+.options{
+  display:flex;flex-direction:column;gap:0.55rem;
+  margin-bottom:2.75rem;
+}
+
+.option{
+  display:flex;align-items:flex-start;gap:1rem;
+  padding:0.9rem 1.25rem;
+  border:1px solid var(--border2);
+  background:var(--bg2);
+  cursor:pointer;
+  transition:all 0.15s;
+  position:relative;
+}
+
+.option:hover{
+  border-color:var(--gold-border);
+  background:var(--gold-bg);
+}
+
+.option.selected{
+  border-color:var(--gold);
+  background:var(--gold-bg);
+}
+
+.option.selected::after{
+  content:'';
+  position:absolute;right:1.25rem;top:50%;
+  transform:translateY(-50%);
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--gold);
+}
+
+.option-key{
+  font-family:'DM Mono',monospace;
+  font-size:0.58rem;color:var(--muted);
+  width:1.4rem;flex-shrink:0;
+  letter-spacing:0.1em;
+  padding-top:0.1rem;
+}
+
+.option-text{
+  font-size:0.87rem;color:var(--ink2);
+  line-height:1.5;
+}
+
+/* NAV BUTTONS */
+.q-nav{
+  display:flex;justify-content:space-between;align-items:center;
+}
+
+.btn-back{
+  padding:0.7rem 1.25rem;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--muted);
+  font-size:0.8rem;
+  cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:all 0.15s;
+}
+
+.btn-back:hover{border-color:var(--gold);color:var(--gold);}
+
+.btn-next{
+  padding:0.8rem 1.75rem;
+  background:var(--gold);
+  color:var(--bg);
+  border:none;
+  font-size:0.83rem;font-weight:500;
+  cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:background 0.15s;
+  display:flex;align-items:center;gap:0.5rem;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+
+.btn-next:hover{background:var(--gold2);}
+.btn-next:disabled{opacity:0.3;cursor:not-allowed;}
+
+/* ─── GATE SCREEN ─── */
+#screen-gate{
+  min-height:100vh;
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:3rem 2rem;
+  background:var(--bg);
+}
+#screen-gate.active{display:flex;}
+
+.gate-box{
+  width:100%;max-width:500px;
+  border:1px solid var(--border);
+  background:var(--bg2);
+  padding:2.75rem;
+}
+
+.gate-eyebrow{
+  font-family:'DM Mono',monospace;
+  font-size:0.55rem;letter-spacing:0.3em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:1.25rem;
+  opacity:0.7;
+}
+
+.gate-box h2{
+  font-family:'Playfair Display',serif;
+  font-size:1.9rem;font-weight:900;
+  line-height:1.1;margin-bottom:0.75rem;
+  color:var(--cream);
+}
+
+.gate-box p{
+  font-size:0.87rem;color:var(--muted);
+  line-height:1.75;margin-bottom:2rem;
+}
+
+.gate-box p strong{color:var(--ink2);font-weight:400;}
+
+.form-row{margin-bottom:1.1rem;}
+
+.form-label{
+  display:block;
+  font-family:'DM Mono',monospace;
+  font-size:0.52rem;letter-spacing:0.25em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:0.45rem;
+}
+
+.form-input,.form-select{
+  width:100%;
+  padding:0.78rem 1rem;
+  border:1px solid var(--border);
+  background:var(--bg3);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.88rem;color:var(--ink);
+  outline:none;
+  transition:border-color 0.15s;
+}
+
+.form-input::placeholder{color:var(--muted);}
+
+.form-input:focus,.form-select:focus{border-color:var(--gold);}
+
+.form-select{
+  cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238a8470' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 1rem center;
+  background-color:var(--bg3);
+}
+
+.form-select option{
+  background:var(--bg3);
+  color:var(--ink);
+}
+
+.gate-privacy{
+  font-size:0.7rem;color:var(--muted);
+  margin-top:1.25rem;line-height:1.55;
+  text-align:center;
+  opacity:0.7;
+}
+
+/* ─── LOADING SCREEN ─── */
+#screen-loading{
+  min-height:100vh;
+  display:none;
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:2rem;
+}
+
+#screen-loading.active{display:flex;}
+
+.loading-px{
+  font-family:'DM Mono',monospace;
+  font-size:0.6rem;letter-spacing:0.3em;
+  text-transform:uppercase;color:var(--gold);
+  opacity:0.6;
+}
+
+.loading-text{
+  font-family:'DM Mono',monospace;
+  font-size:0.62rem;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+.loading-bar{
+  width:180px;height:1px;
+  background:var(--bg4);overflow:hidden;
+}
+
+.loading-fill{
+  height:100%;background:var(--gold);
+  animation:loadingbar 2.2s ease forwards;
+}
+
+@keyframes loadingbar{
+  from{width:0}to{width:100%}
+}
+
+/* ─── RESULTS SCREEN ─── */
+#screen-results{
+  min-height:100vh;
+  display:none;
+}
+#screen-results.active{display:block;}
+
+.results-header{
+  background:var(--bg2);
+  padding:4rem 2rem 3rem;
+  text-align:center;
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--border);
+}
+
+.results-header::before{
+  content:'';
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 120%,rgba(212,168,71,0.07),transparent 70%);
+}
+
+.results-header .px-logo{
+  color:var(--gold);
+  opacity:0.5;
+  margin-bottom:2rem;
+  position:relative;z-index:1;
+}
+
+.results-header h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(0.95rem,2vw,1.1rem);
+  font-weight:400;font-style:italic;
+  color:var(--muted);
+  margin-bottom:0.4rem;
+  position:relative;z-index:1;
+  letter-spacing:0.02em;
+}
+
+.results-header .client-name{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.7rem,4vw,2.6rem);
+  font-weight:900;
+  color:var(--cream);
+  position:relative;z-index:1;
+}
+
+/* SCORE CIRCLE */
+.score-section{
+  background:var(--bg2);
+  padding:2.5rem 2rem 3.5rem;
+  text-align:center;
+  position:relative;
+  border-bottom:1px solid var(--border);
+}
+
+.score-circle{
+  width:168px;height:168px;
+  margin:0 auto 1.75rem;
+  position:relative;
+}
+
+.score-circle svg{
+  transform:rotate(-90deg);
+}
+
+.score-circle-bg{stroke:rgba(212,168,71,0.1);}
+.score-circle-fill{
+  stroke:var(--gold);
+  stroke-linecap:round;
+  transition:stroke-dashoffset 1.5s ease;
+}
+
+.score-number{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+
+.score-val{
+  font-family:'Playfair Display',serif;
+  font-size:3rem;font-weight:900;
+  color:var(--cream);line-height:1;
+}
+
+.score-max{
+  font-family:'DM Mono',monospace;
+  font-size:0.55rem;color:var(--muted);
+  letter-spacing:0.15em;margin-top:0.15rem;
+}
+
+.score-label{
+  font-family:'Playfair Display',serif;
+  font-size:1.4rem;font-weight:700;
+  font-style:italic;color:var(--gold);
+  margin-bottom:0.6rem;
+}
+
+.score-desc{
+  font-size:0.86rem;
+  color:var(--muted);
+  max-width:460px;margin:0 auto;
+  line-height:1.75;
+}
+
+/* RESULTS BODY */
+.results-body{
+  max-width:680px;
+  margin:0 auto;
+  padding:3.5rem 2rem;
+}
+
+.results-section-title{
+  font-family:'DM Mono',monospace;
+  font-size:0.55rem;letter-spacing:0.3em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:0.6rem;
+  opacity:0.7;
+}
+
+.results-h2{
+  font-family:'Playfair Display',serif;
+  font-size:1.65rem;font-weight:900;
+  margin-bottom:1.75rem;
+  line-height:1.15;
+  color:var(--cream);
+}
+
+/* DIMENSION RESULTS */
+.dim-results{margin:2rem 0 3rem;}
+
+.dim-result{
+  margin-bottom:1rem;
+  padding:1.25rem 1.5rem;
+  border:1px solid var(--border2);
+  background:var(--bg2);
+}
+
+.dim-result-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:0.7rem;gap:1rem;flex-wrap:wrap;
+}
+
+.dim-result-name{
+  font-size:0.83rem;font-weight:500;
+  color:var(--cream);
+  display:flex;align-items:center;gap:0.6rem;
+}
+
+.dim-result-dot{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;
+}
+
+.dim-result-score{
+  font-family:'DM Mono',monospace;
+  font-size:0.68rem;color:var(--gold);
+  letter-spacing:0.1em;flex-shrink:0;
+  opacity:0.8;
+}
+
+.dim-bar{
+  height:2px;background:var(--bg4);
+  margin-bottom:0.75rem;
+  position:relative;overflow:hidden;
+}
+
+.dim-bar-fill{
+  height:100%;
+  transition:width 1s ease 0.3s;
+}
+
+.dim-insight{
+  font-size:0.8rem;color:var(--muted);
+  line-height:1.7;
+  font-style:italic;
+}
+
+/* PRIORITY GAPS */
+.gaps{margin:2rem 0 3rem;}
+
+.gap-item{
+  display:grid;
+  grid-template-columns:2.5rem 1fr;
+  gap:1rem;
+  padding:1.25rem 0;
+  border-bottom:1px solid var(--border2);
+  align-items:start;
+}
+
+.gap-item:last-child{border-bottom:none;}
+
+.gap-rank{
+  font-family:'Playfair Display',serif;
+  font-size:1.8rem;font-weight:900;
+  color:var(--gold);opacity:0.25;
+  line-height:1;
+}
+
+.gap-content strong{
+  display:block;font-size:0.86rem;
+  font-weight:500;color:var(--cream);
+  margin-bottom:0.3rem;
+}
+
+.gap-content p{
+  font-size:0.8rem;color:var(--muted);
+  line-height:1.65;
+}
+
+/* CTA BOX */
+.cta-box{
+  border:1px solid var(--gold-border);
+  background:var(--gold-bg);
+  padding:2rem 2.25rem;
+  margin:2.5rem 0 1.5rem;
+}
+
+.cta-box h3{
+  font-family:'Playfair Display',serif;
+  font-size:1.25rem;font-weight:700;
+  line-height:1.3;margin-bottom:0.75rem;
+  color:var(--cream);
+}
+
+.cta-box p{
+  font-size:0.85rem;color:var(--muted);
+  line-height:1.75;margin-bottom:1.5rem;
+}
+
+.btn-cta{
+  display:inline-flex;align-items:center;gap:0.75rem;
+  padding:0.9rem 2rem;
+  background:var(--gold);color:var(--bg);
+  font-size:0.82rem;font-weight:500;
+  cursor:pointer;border:none;
+  font-family:'DM Sans',sans-serif;
+  transition:background 0.2s;
+  text-decoration:none;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+
+.btn-cta:hover{background:var(--gold2);}
+
+.next-steps-box{
+  border:1px solid var(--border2);
+  background:var(--bg2);
+  padding:1.5rem;
+  font-size:0.82rem;color:var(--muted);
+  line-height:1.75;
+}
+
+.next-steps-box strong{color:var(--ink2);font-weight:400;}
+
+.results-footer{
+  padding:2rem;
+  border-top:1px solid var(--border2);
+  font-family:'DM Mono',monospace;
+  font-size:0.5rem;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--muted);
+  text-align:center;
+  opacity:0.5;
+}
+
+/* ─── API STATUS ─── */
+.api-notice{
+  display:none;
+  margin-top:1rem;
+  padding:0.75rem 1rem;
+  font-family:'DM Mono',monospace;
+  font-size:0.58rem;letter-spacing:0.15em;
+  text-transform:uppercase;
+}
+
+.api-notice.success{
+  background:rgba(90,184,122,0.07);
+  border:1px solid rgba(90,184,122,0.2);
+  color:#5ab87a;
+  display:block;
+}
+
+.api-notice.error{
+  background:rgba(212,80,60,0.07);
+  border:1px solid rgba(212,80,60,0.2);
+  color:#d44040;
+  display:block;
+}
+
+/* ─── LOADING BTN STATE ─── */
+.btn-primary.loading{
+  opacity:0.6;cursor:not-allowed;
+  pointer-events:none;
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.fade-in{
+  opacity:0;animation:fadeUp 0.5s ease forwards;
+}
+
+@media(max-width:520px){
+  .welcome-hero{padding:4rem 1.25rem 3rem;}
+  .question-area{padding:2.5rem 1.25rem;}
+  .results-body{padding:2.5rem 1.25rem;}
+  .gate-box{padding:2rem 1.5rem;}
+  .meta-row{gap:1.25rem;}
+  .welcome-footer{flex-direction:column;gap:0.25rem;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── WELCOME ─── -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-hero">
+    <div class="px-logo">PX Consulting · Perception Management Consulting Pvt. Ltd.</div>
+    <h1>How healthy is<br>your business<br><em>really?</em></h1>
+    <p>Most business owners know something is off. They just cannot name it with precision. <strong>This 15-minute diagnostic — built on 30 years of cross-industry consulting experience — gives you a clear picture of exactly where your business stands and what to address first.</strong></p>
+    <div class="meta-row">
+      <div class="meta-item"><span>25</span>&nbsp;questions</div>
+      <div class="meta-item"><span>5</span>&nbsp;dimensions</div>
+      <div class="meta-item"><span>~12</span>&nbsp;minutes</div>
+      <div class="meta-item"><span>100%</span>&nbsp;free</div>
+    </div>
+    <button class="btn-primary" onclick="startAssessment()">
+      Start the diagnostic <span class="arrow">→</span>
+    </button>
+  </div>
+  <div class="welcome-footer">
+    <span>Confidential &nbsp;·&nbsp; Your data is never shared or sold</span>
+    <span>pxconsulting.in</span>
+  </div>
+</div>
+
+<!-- ─── ASSESSMENT ─── -->
+<div id="screen-assessment" class="screen">
+
+  <div class="progress-bar">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-info">
+      <span class="progress-label" id="progress-label">Getting started</span>
+      <span class="progress-num" id="progress-num">0 / 25</span>
+    </div>
+  </div>
+
+  <div class="dimension-bar">
+    <div class="dimension-bar-inner">
+      <div class="dimension-dot" id="dim-dot"></div>
+      <div class="dimension-name" id="dim-name"></div>
+    </div>
+  </div>
+
+  <div class="question-area">
+    <div class="question-num" id="q-num"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="question-sub" id="q-sub"></div>
+    <div class="options" id="options"></div>
+    <div class="q-nav">
+      <button class="btn-back" id="btn-back" onclick="prevQuestion()">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()" disabled>
+        Next <span>→</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── GATE ─── -->
+<div id="screen-gate" class="screen">
+  <div class="gate-box">
+    <div class="gate-eyebrow">PX Business Health Check</div>
+    <h2>Your report<br>is ready.</h2>
+    <p>Enter your details below to see your full Business Health Score across all 5 dimensions — and your <strong>prioritised action roadmap.</strong></p>
+
+    <div class="form-row">
+      <label class="form-label">Your name *</label>
+      <input class="form-input" type="text" id="gate-name" placeholder="Full name" autocomplete="name">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Company name</label>
+      <input class="form-input" type="text" id="gate-company" placeholder="Your company">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Annual revenue (approx) *</label>
+      <select class="form-select" id="gate-revenue">
+        <option value="">Select range</option>
+        <option value="Below ₹5 crore">Below ₹5 crore</option>
+        <option value="₹5–20 crore">₹5–20 crore</option>
+        <option value="₹20–50 crore">₹20–50 crore</option>
+        <option value="₹50–100 crore">₹50–100 crore</option>
+        <option value="₹100–200 crore">₹100–200 crore</option>
+        <option value="Above ₹200 crore">Above ₹200 crore</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Email address *</label>
+      <input class="form-input" type="email" id="gate-email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="form-row">
+      <label class="form-label">WhatsApp number *</label>
+      <input class="form-input" type="tel" id="gate-phone" placeholder="+91 98765 43210" autocomplete="tel">
+    </div>
+
+    <button class="btn-primary" id="gate-submit-btn" style="width:100%;justify-content:center;margin-top:0.75rem" onclick="showResults()">
+      See my results <span class="arrow">→</span>
+    </button>
+
+    <div id="api-notice" class="api-notice"></div>
+
+    <p class="gate-privacy">Your information is kept strictly confidential and never shared or sold to any third party.</p>
+  </div>
+</div>
+
+<!-- ─── LOADING ─── -->
+<div id="screen-loading" class="screen">
+  <div class="loading-px">PX Consulting</div>
+  <div class="loading-text" id="loading-text">Analysing your responses…</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- ─── RESULTS ─── -->
+<div id="screen-results" class="screen">
+
+  <div class="results-header">
+    <div class="px-logo">PX Business Health Check</div>
+    <h1>Business Health Report for</h1>
+    <div class="client-name" id="result-name">—</div>
+  </div>
+
+  <div class="score-section">
+    <div class="score-circle">
+      <svg width="168" height="168" viewBox="0 0 168 168">
+        <circle class="score-circle-bg" cx="84" cy="84" r="72" fill="none" stroke-width="6"/>
+        <circle class="score-circle-fill" id="score-arc" cx="84" cy="84" r="72" fill="none" stroke-width="6"
+          stroke-dasharray="452" stroke-dashoffset="452"/>
+      </svg>
+      <div class="score-number">
+        <div class="score-val" id="score-display">0</div>
+        <div class="score-max">/ 100</div>
+      </div>
+    </div>
+    <div class="score-label" id="score-label">—</div>
+    <div class="score-desc" id="score-desc">—</div>
+  </div>
+
+  <div class="results-body">
+
+    <div class="fade-in" style="animation-delay:0.1s">
+      <div class="results-section-title">Dimension Breakdown</div>
+      <div class="results-h2">Your scores across<br>5 operational dimensions.</div>
+      <div class="dim-results" id="dim-results"></div>
+    </div>
+
+    <div class="fade-in" style="animation-delay:0.2s">
+      <div class="results-section-title">Priority Gaps</div>
+      <div class="results-h2">The 3 areas to address first.</div>
+      <div class="gaps" id="priority-gaps"></div>
+    </div>
+
+    <div class="fade-in cta-box" style="animation-delay:0.3s">
+      <h3>Want to understand exactly what these findings mean for your business?</h3>
+      <p>VP will personally review your diagnostic results with you in a free 45-minute conversation — no pitch, just clarity on what your scores reveal and what to prioritise first.</p>
+      <a href="https://px-consulting.odoo.com/book/e71f3249" target="_blank" rel="noopener" class="btn-cta">
+        Book your free results review →
+      </a>
+    </div>
+
+    <div class="next-steps-box fade-in" style="animation-delay:0.4s">
+      <strong>What happens next:</strong> You will receive a copy of this report by email within a few minutes. If you choose to book a review call, VP will have read your specific scores before the conversation begins — so the 45 minutes is spent entirely on your situation, not on general advice.
+    </div>
+
+  </div>
+
+  <div class="results-footer">
+    PX Consulting · Perception Management Consulting Pvt. Ltd. · Faridabad · pxconsulting.in
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ODOO SUBMISSION — via Netlify serverless function
+   The function at /.netlify/functions/submit-lead handles
+   the actual Odoo API call. API key never lives in this file.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   DIMENSIONS & QUESTIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+const dimensions = [
+  { id:'ops',        name:'Operational Structure',   color:'var(--s0)' },
+  { id:'people',     name:'Accountability & People', color:'var(--s1)' },
+  { id:'financial',  name:'Financial Visibility',    color:'var(--s2)' },
+  { id:'process',    name:'Process Consistency',     color:'var(--s3)' },
+  { id:'leadership', name:'Leadership Bandwidth',    color:'var(--s4)' }
+];
+
+const questions = [
+  // DIMENSION 1 — Operational Structure (Q1–5)
+  {dim:0,num:1,
+   text:"If you left the business for 30 days with no phone — would it continue operating normally, or would things break?",
+   sub:"Be honest. Think about what actually happened the last time you were unavailable for more than a few days.",
+   opts:["It would stop functioning — I am essential to daily operations","Major disruptions would occur within a week","Some areas would struggle, others would manage","It would mostly operate — a few things would need decisions","It would operate completely normally — I am not load-bearing"]},
+  {dim:0,num:2,
+   text:"Do you have a clearly documented organisational structure — showing who reports to whom and who is responsible for what outcome?",
+   sub:null,
+   opts:["Nothing is documented — it exists only in my head","A rough chart exists but is not current or trusted","A basic structure exists but accountability is still unclear","A documented structure exists and is mostly followed","A clear, current org structure with defined accountability for outcomes"]},
+  {dim:0,num:3,
+   text:"When a decision needs to be made — even a medium-sized one — does it require your involvement?",
+   sub:"Think about the last 10 decisions made in your business. How many came through you?",
+   opts:["Nearly all decisions — including small ones — come through me","Most decisions require my sign-off","About half require my involvement","Most decisions are made without me — I am involved in the important ones","Decisions are made at the appropriate level consistently — I am rarely in the loop on operational calls"]},
+  {dim:0,num:4,
+   text:"Have you built a second-in-command — someone who can represent the business's operational priorities without you in the room?",
+   sub:null,
+   opts:["No — there is no one close to that role","Someone could partially do this but not reliably","One person could manage most situations with preparation","Yes — one person can handle most operational matters independently","Yes — multiple people can represent the business effectively without me"]},
+  {dim:0,num:5,
+   text:"Does your business have a defined weekly operating rhythm — regular reviews, reporting cadences, and a predictable meeting structure?",
+   sub:"Not whether meetings happen — but whether they are structured, consistent, and produce decisions.",
+   opts:["No regular operating rhythm — things happen reactively","Ad hoc — some recurring meetings but no structured cadence","A partial rhythm — some consistency, some chaos","A mostly consistent cadence — occasionally disrupted","A well-defined operating rhythm that runs without my prompting"]},
+
+  // DIMENSION 2 — Accountability & People (Q6–10)
+  {dim:1,num:6,
+   text:"Does every person in a leadership role have a written description of what they are responsible for and how their success is measured?",
+   sub:null,
+   opts:["No written descriptions exist anywhere","A few roles have descriptions — most do not","About half have written descriptions","Most roles have written descriptions","Every leadership role has a clear written description with measurable outcomes"]},
+  {dim:1,num:7,
+   text:"When something goes wrong in the business, is it immediately clear whose responsibility it was — or does accountability get diffused across multiple people?",
+   sub:"Think about the last significant problem that occurred.",
+   opts:["Accountability is almost always unclear — multiple people involved","Mostly unclear — occasional clarity on simple issues","Mixed — clear for some issues, diffused for others","Usually clear — occasional ambiguity on complex problems","Always clear — one person owns every outcome"]},
+  {dim:1,num:8,
+   text:"Do your senior team members proactively bring you solutions — or do they mostly bring you problems?",
+   sub:null,
+   opts:["They bring problems only — I am expected to solve them","Mostly problems — rare attempts to propose solutions","About equal mix of problems and solutions","Mostly solutions — they come with a recommendation","Always solutions — they only escalate after attempting to resolve"]},
+  {dim:1,num:9,
+   text:"When you make a decision in a meeting, does it get implemented reliably — or does follow-through depend on you chasing it?",
+   sub:"Think about the last 5 significant decisions made in a team meeting.",
+   opts:["Nothing moves without me following up personally","Most things require follow-up from me","About half implement without reminders","Most things happen — occasional follow-up needed","Decisions are implemented reliably without my follow-up"]},
+  {dim:1,num:10,
+   text:"Do you have at least one person in your business who could credibly represent the company to a major client or vendor — without you present?",
+   sub:null,
+   opts:["No — I am the only credible face of the business externally","Possibly, but I would not be comfortable with it","One or two people could manage with preparation","Yes — one or two people could handle most situations","Yes — multiple people can represent the company credibly"]},
+
+  // DIMENSION 3 — Financial Visibility (Q11–15)
+  {dim:2,num:11,
+   text:"Do you know your gross margin by product line or service type — without having to ask your accountant?",
+   sub:"This is about real-time awareness, not whether the data exists somewhere.",
+   opts:["No — I do not track margins at this level","I have a rough sense but not precise figures","I know the approximate numbers for main lines","I know the margins clearly for most products/services","I know precise margins by line and monitor them regularly"]},
+  {dim:2,num:12,
+   text:"Can you tell within 48 hours whether this month is tracking ahead or behind last month — without waiting for a monthly report?",
+   sub:null,
+   opts:["No — I wait for the monthly closing to know","I can make a rough guess but not with confidence","I can tell directionally but not with precision","I can tell fairly accurately within a couple of days","Yes — I have real-time visibility into monthly performance"]},
+  {dim:2,num:13,
+   text:"Do you know which 20% of your customers generate 80% of your profit — not just revenue?",
+   sub:"The distinction between revenue and profit contribution is important here.",
+   opts:["No — I have never analysed this","I know roughly by revenue but not by profit","I have a partial picture — top customers identified approximately","I know this clearly for revenue, approximately for profit","I know precisely which customers drive profit and monitor this"]},
+  {dim:2,num:14,
+   text:"When evaluating a significant decision — a new hire, a new machine, a new contract — do you have a clear framework for assessing whether it will improve profitability?",
+   sub:null,
+   opts:["No framework — decisions are made on instinct and experience","Rough mental calculations only","Some analysis happens but it is inconsistent","A reasonable process exists and is usually followed","A clear, consistent framework is applied to all significant decisions"]},
+  {dim:2,num:15,
+   text:"Do you have a cash flow projection for the next 90 days that you trust and refer to regularly?",
+   sub:null,
+   opts:["No cash flow projection exists","One exists but I do not trust its accuracy","One exists, reviewed occasionally but not relied upon","One exists and is reviewed monthly","Yes — a trusted 90-day projection is reviewed weekly"]},
+
+  // DIMENSION 4 — Process Consistency (Q16–20)
+  {dim:3,num:16,
+   text:"If your best operator left tomorrow, would the quality of the work they were responsible for drop significantly?",
+   sub:"This tests how much critical capability lives in one person versus the system.",
+   opts:["Yes — it would be severely impacted for months","Yes — significant drop for several weeks at least","Some impact but recoverable within a week or two","Minimal impact — others could step in fairly quickly","No impact — processes are documented and transferable"]},
+  {dim:3,num:17,
+   text:"Do you have documented standard operating procedures for your top 5 most critical business processes — written down and accessible, not just in people's heads?",
+   sub:null,
+   opts:["No documentation exists for any critical process","1–2 processes are documented","About half of critical processes are documented","Most critical processes are documented","All top 5+ critical processes are fully documented and accessible"]},
+  {dim:3,num:18,
+   text:"When the same type of problem occurs repeatedly in your business, does it get solved the same way each time — or does it depend on who is handling it?",
+   sub:"Think about recurring operational challenges — customer complaints, supplier delays, quality issues.",
+   opts:["Entirely depends on who handles it — no consistency","Mostly inconsistent — occasional patterns","About 50/50 — some consistent approaches, some not","Mostly consistent — similar problems handled similarly","Highly consistent — standard responses exist and are followed"]},
+  {dim:3,num:19,
+   text:"Does your customer experience — from first contact to delivery to follow-up — happen consistently regardless of which team member is involved?",
+   sub:null,
+   opts:["Highly variable — completely depends on the individual","Mostly variable with some consistent elements","Mixed — some touchpoints are consistent, others are not","Mostly consistent — occasional variations","Fully consistent — the experience is the same regardless of who delivers it"]},
+  {dim:3,num:20,
+   text:"When you introduce a new way of doing something, does the change actually stick within 30 days — or does the team revert to the old way?",
+   sub:"Think about the last 3 process changes you tried to implement.",
+   opts:["Changes almost never stick — the team reverts quickly","Changes rarely stick without constant reinforcement","About 50% of changes stick long-term","Most changes stick — occasional reversion","Changes stick reliably — the team adapts and maintains them"]},
+
+  // DIMENSION 5 — Leadership Bandwidth (Q21–25)
+  {dim:4,num:21,
+   text:"In a typical week, what percentage of your time is spent on things only you can decide — versus things someone else could handle if given the right authority?",
+   sub:"This question is reverse-scored — spending more time on things only you can decide is better.",
+   opts:["Over 70% on low-level tasks — very little strategic time","50–70% on low-level tasks","About 50/50 split between strategic and operational","30–50% on things others could handle","Under 30% — most of my time is on genuinely strategic matters"]},
+  {dim:4,num:22,
+   text:"Do you regularly have uninterrupted time to think about where the business is going — or is most of your day reactive?",
+   sub:null,
+   opts:["Entirely reactive — no protected thinking time","Mostly reactive — very occasional strategic time","Some protected time but often interrupted","Regular strategic time, though sometimes disrupted","Consistent protected time for strategic thinking every week"]},
+  {dim:4,num:23,
+   text:"Are there decisions you make today that you were making 3 years ago — things that should have been delegated but have not been?",
+   sub:"Be honest about how much of your role has genuinely evolved.",
+   opts:["Yes — most of what I do today is the same as 3 years ago","Significant overlap — maybe 60–70% unchanged","Some overlap — roughly half is the same","Small overlap — most decisions have evolved or been delegated","Minimal overlap — my role has genuinely transformed"]},
+  {dim:4,num:24,
+   text:"When you visit operations or go on-site, is it because you choose to — or because things tend to go wrong when you do not?",
+   sub:null,
+   opts:["Things go wrong without me — my presence is load-bearing","I feel obligated to be there more than I choose to be","About equal — some visits by choice, some by necessity","Mostly by choice — things run fine without me","Always by choice — my presence is not required for smooth operations"]},
+  {dim:4,num:25,
+   text:"Do you feel the business is growing in a direction you are deliberately steering — or does it feel like you are mostly keeping up with it?",
+   sub:"This is about whether you are in front of the business or running behind it.",
+   opts:["Entirely keeping up — the business is running me","Mostly keeping up with occasional deliberate moves","About equal — some direction, some reaction","Mostly deliberate — with occasional reactive periods","Fully deliberate — I am steering the business with clear intent"]}
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+
+let currentQ = 0;
+let answers = new Array(25).fill(null);
+let userData = {};
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════════════ */
+
+function startAssessment(){
+  showScreen('screen-assessment');
+  renderQuestion(0);
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function renderQuestion(idx){
+  const q = questions[idx];
+  const dim = dimensions[q.dim];
+  const pct = Math.round((idx/25)*100);
+
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-num').textContent = idx+' / 25';
+  document.getElementById('progress-label').textContent = dim.name;
+
+  document.getElementById('dim-dot').style.background = dim.color;
+  document.getElementById('dim-name').textContent = dim.name;
+  document.getElementById('dim-name').style.color = dim.color;
+
+  document.getElementById('q-num').textContent = 'Question '+q.num+' of 25';
+  document.getElementById('q-text').textContent = q.text;
+  const subEl = document.getElementById('q-sub');
+  if(q.sub){ subEl.textContent = q.sub; subEl.style.display='block'; }
+  else { subEl.style.display='none'; }
+
+  const optContainer = document.getElementById('options');
+  optContainer.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[idx]===i?' selected':'');
+    div.innerHTML = `<span class="option-key">${['A','B','C','D','E'][i]}</span><span class="option-text">${opt}</span>`;
+    div.onclick = () => selectAnswer(idx, i, div);
+    optContainer.appendChild(div);
+  });
+
+  document.getElementById('btn-back').style.visibility = idx===0?'hidden':'visible';
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = answers[idx]===null;
+  nextBtn.textContent = idx===24 ? 'Complete ✓' : 'Next →';
+}
+
+function selectAnswer(qIdx, aIdx, el){
+  answers[qIdx] = aIdx;
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('btn-next').disabled = false;
+}
+
+function nextQuestion(){
+  if(currentQ < 24){
+    currentQ++;
+    renderQuestion(currentQ);
+  } else {
+    showScreen('screen-gate');
+  }
+}
+
+function prevQuestion(){
+  if(currentQ > 0){
+    currentQ--;
+    renderQuestion(currentQ);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCORING
+   ═══════════════════════════════════════════════════════════════ */
+
+function calcScores(){
+  const dimScores = [0,0,0,0,0];
+  questions.forEach((q,i)=>{
+    if(answers[i]!==null){
+      let score = answers[i]+1; // 1–5
+      if(i===20) score = 6-score; // Q21 is reverse-scored
+      dimScores[q.dim] += score;
+    }
+  });
+  const total = dimScores.reduce((a,b)=>a+b,0);
+  const totalMax = 125;
+  const totalPct = Math.round((total/totalMax)*100);
+  return { dimScores, total, totalPct };
+}
+
+function getScoreLabel(pct){
+  if(pct>=80) return {
+    label:'Operationally Strong',
+    color:'#5ab87a',
+    desc:'Your business has real structural foundations. The gaps that exist are refinement opportunities, not existential risks. The question now is whether the structure can handle the next stage of growth.'
+  };
+  if(pct>=60) return {
+    label:'Functional but Owner-Dependent',
+    color:'#d4a847',
+    desc:'The business works — but it works because of you. That is not sustainable at scale and it is not a business you can ever fully step back from. The gaps are identifiable and fixable with the right framework.'
+  };
+  if(pct>=40) return {
+    label:'Structurally Fragile',
+    color:'#e07a30',
+    desc:'There are real operational gaps costing you money and energy right now, even if they are not yet visible as crises. Businesses at this score typically hit a growth ceiling they cannot explain and cannot break through.'
+  };
+  return {
+    label:'High Risk',
+    color:'#d44040',
+    desc:'The business is more dependent on individuals and informal systems than it should be at your stage. This creates serious vulnerability — to key person departure, to growth pressure, to succession. The cost of not addressing this compounds every year.'
+  };
+}
+
+function getDimInsight(dimIdx, score){
+  const pct = Math.round((score/25)*100);
+  const insights = [
+    ['Critical: your business structurally depends on your physical presence. Almost every decision and process requires you. This is the most common source of the growth ceiling.',
+     'Your operational structure is partially built but still heavily owner-dependent. Several key processes rely on informal systems rather than documented structures.',
+     'Your operational structure has a reasonable foundation. The remaining gaps are specific — processes that have grown beyond their systems.',
+     'Strong operational structure. The business can run without you for reasonable periods. Focus on the remaining dependencies.',
+     'Excellent operational structure. Your systems work independently of any individual. This is a significant competitive advantage.'],
+    ['Accountability is almost entirely absent. Your team cannot make decisions or own outcomes without you. This is both a culture issue and a structural one.',
+     'Accountability exists in name but not reliably in practice. When things go wrong, ownership diffuses. This is costing you significantly in follow-through.',
+     'Your accountability systems are partially functional. Some roles are clear, others are not. The inconsistency creates unpredictability.',
+     'Good accountability structure. Most roles are clear and your team takes ownership. A few gaps remain worth addressing.',
+     'Strong accountability culture. Your team owns outcomes, brings solutions, and follows through without constant oversight.'],
+    ['Your financial visibility is critically low. You are making significant decisions without reliable data. This is one of the highest-risk gaps in any business.',
+     'You have basic financial information but lack the granularity to make confident decisions. Important margins and trends are invisible to you.',
+     'Moderate financial visibility. You have the broad picture but lack detail in key areas — particularly margin by line and forward cash visibility.',
+     'Good financial visibility. You have the data you need for most decisions. Improving granularity in 1–2 areas would give you a genuine edge.',
+     'Excellent financial visibility. You understand your numbers deeply and use them proactively. This is a significant strategic asset.'],
+    ['Critical process risk. Your operations are almost entirely dependent on specific individuals. One departure could be severely disruptive.',
+     'High process inconsistency. Key processes live in people\'s heads. Customer experience and output quality vary significantly based on who is involved.',
+     'Moderate process consistency. Some critical processes are documented and followed. Others still rely on individual knowledge.',
+     'Good process consistency. Most critical processes are documented and followed. A few gaps remain — particularly in edge cases.',
+     'Excellent process consistency. Your operations are systematised. Quality and experience are reliably consistent regardless of who delivers them.'],
+    ['Your leadership bandwidth is critically constrained. You are spending the vast majority of your time on decisions and tasks that should have been delegated years ago.',
+     'Low leadership bandwidth. Most of your week is consumed by operational decisions. Strategic thinking time is rare and often interrupted.',
+     'Moderate leadership bandwidth. You have some protected strategic time but the operational pull is still significant.',
+     'Good leadership bandwidth. You have meaningful strategic time and have successfully delegated significant operational responsibility.',
+     'Excellent leadership bandwidth. Your role is genuinely strategic. The business does not require your presence for day-to-day decisions.']
+  ];
+  const idx = pct>=80?4:pct>=60?3:pct>=40?2:pct>=25?1:0;
+  return insights[dimIdx][idx];
+}
+
+function getPriorityGaps(dimScores){
+  const gaps = dimensions.map((d,i)=>({ ...d, score: dimScores[i], pct: Math.round((dimScores[i]/25)*100) }));
+  gaps.sort((a,b)=>a.pct-b.pct);
+  return gaps.slice(0,3);
+}
+
+const gapRecommendations = {
+  ops:        { title:'Reduce owner dependency in operations',      desc:'Map every process that requires your presence to function. For each one, identify who could own it and what documentation or authority they need. Start with the one that consumes the most of your week.' },
+  people:     { title:'Build a real accountability structure',      desc:'Every role in your leadership team needs a written description with measurable outcomes — not a job title. Then create a weekly review rhythm where people report against their own metrics, not just to you.' },
+  financial:  { title:'Create real-time financial visibility',      desc:'You need a dashboard that shows you gross margin by line, monthly performance vs last year, and a 90-day cash projection — updated weekly. This is not a finance team project. It is a leadership tool.' },
+  process:    { title:'Document your 5 most critical processes',    desc:'Start with the process where a single departure would hurt most. Map it end to end. Have the person who runs it document it themselves. Then test it — can someone else follow it without asking questions?' },
+  leadership: { title:'Reclaim strategic time through delegation',  desc:'Identify the 5 decisions you make most frequently that someone else could make with the right authority and information. Transfer those decisions formally. Protect 4 hours per week for strategic thinking — in your calendar, unmovable.' }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   GATE FORM → RESULTS
+   ═══════════════════════════════════════════════════════════════ */
+
+async function showResults(){
+  const name    = document.getElementById('gate-name').value.trim();
+  const company = document.getElementById('gate-company').value.trim();
+  const revenue = document.getElementById('gate-revenue').value;
+  const email   = document.getElementById('gate-email').value.trim();
+  const phone   = document.getElementById('gate-phone').value.trim();
+
+  if(!name || !email){
+    showApiNotice('Please enter your name and email address.', 'error');
+    return;
+  }
+
+  if(!isValidEmail(email)){
+    showApiNotice('Please enter a valid email address.', 'error');
+    return;
+  }
+
+  if(!revenue){
+    showApiNotice('Please select a revenue range.', 'error');
+    return;
+  }
+
+  if(!phone){
+    showApiNotice('Please enter a valid phone number.', 'error');
+    return;
+  }
+
+  if(!isValidPhone(phone)){
+    showApiNotice('Please enter a valid phone number — 10 digits, optionally starting with +91.', 'error');
+    return;
+  }
+
+  // Store user data
+  userData = { name, company, revenue, email, phone };
+
+  // Disable button while processing
+  const btn = document.getElementById('gate-submit-btn');
+  btn.classList.add('loading');
+  btn.textContent = 'Processing…';
+
+  // Calculate scores first
+  const { dimScores, total, totalPct } = calcScores();
+  const scoreInfo = getScoreLabel(totalPct);
+
+  // Submit to Odoo (non-blocking — we show results regardless of API outcome)
+  submitToOdoo(userData, dimScores, totalPct, scoreInfo.label);
+
+  // Show loading screen while building results
+  showScreen('screen-loading');
+  animateLoadingText();
+
+  setTimeout(()=>{
+    buildResults(dimScores, totalPct, scoreInfo);
+    showScreen('screen-results');
+    animateScore(totalPct);
+  }, 2400);
+}
+
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPhone(phone){
+  // Accepts: 10-digit Indian mobile, optionally prefixed with +91, 91, or 0
+  // Valid: 9876543210 / +919876543210 / 919876543210 / 09876543210
+  // Strips spaces and hyphens before checking
+  const cleaned = phone.replace(/[\s\-]/g, '');
+  return /^(\+91|91|0)?[6-9]\d{9}$/.test(cleaned);
+}
+
+function showApiNotice(msg, type){
+  const el = document.getElementById('api-notice');
+  el.textContent = msg;
+  el.className = 'api-notice ' + type;
+}
+
+function animateLoadingText(){
+  const msgs = [
+    'Analysing your responses…',
+    'Scoring 5 dimensions…',
+    'Identifying priority gaps…',
+    'Preparing your report…'
+  ];
+  let i = 0;
+  const el = document.getElementById('loading-text');
+  const interval = setInterval(()=>{
+    i++;
+    if(i < msgs.length) el.textContent = msgs[i];
+    else clearInterval(interval);
+  }, 600);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUILD RESULTS PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+function buildResults(dimScores, totalPct, scoreInfo){
+  const priorityGaps = getPriorityGaps(dimScores);
+
+  // Header
+  const displayName = userData.name + (userData.company ? ', ' + userData.company : '');
+  document.getElementById('result-name').textContent = displayName;
+
+  // Score
+  document.getElementById('score-display').textContent = totalPct;
+  document.getElementById('score-label').textContent = scoreInfo.label;
+  document.getElementById('score-label').style.color = scoreInfo.color;
+  document.getElementById('score-desc').textContent = scoreInfo.desc;
+
+  // Dimension results
+  const dimContainer = document.getElementById('dim-results');
+  dimContainer.innerHTML = '';
+  dimensions.forEach((d,i)=>{
+    const score = dimScores[i];
+    const pct = Math.round((score/25)*100);
+    const insight = getDimInsight(i, score);
+    const el = document.createElement('div');
+    el.className = 'dim-result';
+    el.innerHTML = `
+      <div class="dim-result-head">
+        <div class="dim-result-name">
+          <div class="dim-result-dot" style="background:${d.color}"></div>
+          ${d.name}
+        </div>
+        <div class="dim-result-score">${score} / 25 &nbsp;·&nbsp; ${pct}%</div>
+      </div>
+      <div class="dim-bar">
+        <div class="dim-bar-fill" style="width:0%;background:${d.color}" data-width="${pct}"></div>
+      </div>
+      <div class="dim-insight">${insight}</div>
+    `;
+    dimContainer.appendChild(el);
+  });
+
+  // Animate dimension bars
+  setTimeout(()=>{
+    document.querySelectorAll('.dim-bar-fill').forEach(bar=>{
+      bar.style.transition = 'width 1s ease';
+      bar.style.width = bar.dataset.width+'%';
+    });
+  }, 500);
+
+  // Priority gaps
+  const gapsContainer = document.getElementById('priority-gaps');
+  gapsContainer.innerHTML = '';
+  priorityGaps.forEach((gap,i)=>{
+    const rec = gapRecommendations[gap.id];
+    const el = document.createElement('div');
+    el.className = 'gap-item';
+    el.innerHTML = `
+      <div class="gap-rank">${i+1}</div>
+      <div class="gap-content">
+        <strong>${rec.title}</strong>
+        <p>${rec.desc}</p>
+      </div>
+    `;
+    gapsContainer.appendChild(el);
+  });
+}
+
+function animateScore(totalPct){
+  const arc = document.getElementById('score-arc');
+  const circumference = 452;
+  const offset = circumference - (circumference * totalPct / 100);
+
+  let current = 0;
+  const step = totalPct / 60;
+  const timer = setInterval(()=>{
+    current = Math.min(current + step, totalPct);
+    document.getElementById('score-display').textContent = Math.round(current);
+    if(current >= totalPct) clearInterval(timer);
+  }, 25);
+
+  setTimeout(()=>{
+    arc.style.transition = 'stroke-dashoffset 1.5s ease';
+    arc.style.strokeDashoffset = offset;
+  }, 100);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ODOO API INTEGRATION — via Netlify serverless function
+   ═══════════════════════════════════════════════════════════════
+
+   The browser calls /.netlify/functions/submit-lead
+   That function calls Odoo server-side (no CORS issue).
+   API key lives in Netlify environment variables — never here.
+
+   ODOO CUSTOM FIELDS USED (already exist in your CRM):
+   - x_revenue_range    (Char)     — revenue bracket
+   - x_whatsapp         (Char)     — WhatsApp number
+   - x_total_score      (Integer)  — overall score %
+   - x_dim_scores       (Char)     — all 5 dimension scores as text
+   - x_weakest_dim      (Char)     — name of lowest scoring dimension
+   - x_qualification    (Char)     — qualified / newsletter / junk
+
+   QUALIFICATION LOGIC:
+   - Revenue ≥ ₹20Cr + valid phone + valid email → "qualified"
+   - Revenue < ₹20Cr → "newsletter"
+   - Missing required fields → "junk"
+
+   ═══════════════════════════════════════════════════════════════ */
+
+function getQualification(revenue, phone, email){
+  if(!email || !isValidEmail(email)) return 'junk';
+  if(!phone || !isValidPhone(phone)) return 'junk';
+  const highRevenue = ['₹20–50 crore','₹50–100 crore','₹100–200 crore','Above ₹200 crore'];
+  if(highRevenue.includes(revenue)) return 'qualified';
+  return 'newsletter';
+}
+
+async function submitToOdoo(user, dimScores, totalPct, scoreLabel){
+  const dimPcts = dimScores.map(s => Math.round((s/25)*100));
+  const dimNames = ['Operational Structure','Accountability & People','Financial Visibility','Process Consistency','Leadership Bandwidth'];
+
+  // Find weakest dimension
+  const weakestIdx = dimPcts.indexOf(Math.min(...dimPcts));
+  const weakestDim = dimNames[weakestIdx];
+
+  // Dim scores as readable string for x_dim_scores field
+  const dimScoresText = dimNames.map((n,i) => `${n}: ${dimPcts[i]}%`).join(' | ');
+
+  // Qualification
+  const qualification = getQualification(user.revenue, user.phone, user.email);
+
+  // Build description (goes into lead internal notes)
+  const description = buildLeadDescription(user, dimScores, dimPcts, totalPct, scoreLabel, weakestDim);
+
+  const payload = {
+    name:          user.name,
+    company:       user.company,
+    email:         user.email,
+    phone:         user.phone,
+    revenue:       user.revenue,
+    totalPct,
+    scoreLabel,
+    dimScoresText,
+    weakestDim,
+    qualification,
+    description,
+  };
+
+  try {
+    const response = await fetch('/.netlify/functions/submit-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if(data.success){
+      console.log('PX Diagnostic: Lead created in Odoo. ID:', data.leadId);
+    } else {
+      console.error('PX Diagnostic: Odoo submission failed:', data.error);
+    }
+  } catch(err){
+    // Silent fail — never block results display
+    console.error('PX Diagnostic: Serverless function unreachable:', err.message);
+  }
+}
+
+function buildLeadDescription(user, dimScores, dimPcts, totalPct, scoreLabel, weakestDim){
+  const dimNames = ['Operational Structure','Accountability & People','Financial Visibility','Process Consistency','Leadership Bandwidth'];
+  const gaps = dimensions
+    .map((d,i) => ({ name: dimNames[i], pct: dimPcts[i] }))
+    .sort((a,b) => a.pct - b.pct)
+    .slice(0, 3);
+
+  return `== PX BUSINESS HEALTH CHECK ==
+Completed: ${new Date().toLocaleString('en-IN')}
+
+LEAD DETAILS
+Name: ${user.name}
+Company: ${user.company || '—'}
+Email: ${user.email}
+WhatsApp: ${user.phone}
+Revenue range: ${user.revenue || '—'}
+
+OVERALL SCORE: ${totalPct}% — ${scoreLabel}
+
+DIMENSION SCORES
+${dimNames.map((n,i) => `  ${n}: ${dimPcts[i]}% (${dimScores[i]}/25)`).join('\n')}
+
+WEAKEST DIMENSION: ${weakestDim}
+
+TOP 3 PRIORITY GAPS
+${gaps.map((g,i) => `  ${i+1}. ${g.name} — ${g.pct}%`).join('\n')}
+
+—
+Source: PX Business Health Check
+Lead type: Inbound — diagnostic completion
+Next action: Check x_qualification. If qualified, VP personal follow-up within 24h.`;
+}
+
+</script>
+</body>
+</html>
