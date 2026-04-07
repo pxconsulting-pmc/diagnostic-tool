@@ -1483,7 +1483,7 @@ async function submitToOdoo(user, dimScores, totalPct, scoreLabel){
   };
 
   try {
-    const response = await fetch('/.netlify/functions/submit-lead', {
+    const response = await fetch('/api/submit-lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
