@@ -73,13 +73,13 @@ exports.handler = async (event) => {
   try {
     const result = await httpsPost(
       ODOO_BASE_URL,
-      '/json/2/crm.lead/create?db=px-consulting',
+      '/json/2/crm.lead/create',
       {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'DATABASE':      ODOO_DB,
       },
-      { args: [[leadData]] }
+      { database: ODOO_DB, args: [[leadData]] }
     );
 
     console.log(`Odoo HTTP status: ${result.status}`);
