@@ -844,12 +844,11 @@ body{
       <label class="form-label">Annual revenue (approx) *</label>
       <select class="form-select" id="gate-revenue">
         <option value="">Select range</option>
-        <option value="Below ₹5 crore">Below ₹5 crore</option>
-        <option value="₹5–20 crore">₹5–20 crore</option>
-        <option value="₹20–50 crore">₹20–50 crore</option>
-        <option value="₹50–100 crore">₹50–100 crore</option>
-        <option value="₹100–200 crore">₹100–200 crore</option>
-        <option value="Above ₹200 crore">Above ₹200 crore</option>
+        <option value="under_5cr">Under ₹5 crore</option>
+        <option value="5_20cr">₹5–20 crore</option>
+        <option value="20_50cr">₹20–50 crore</option>
+        <option value="50_100cr">₹50–100 crore</option>
+        <option value="100cr_plus">₹100 crore+</option>
       </select>
     </div>
     <div class="form-row">
@@ -1447,7 +1446,7 @@ function animateScore(totalPct){
 function getQualification(revenue, phone, email){
   if(!email || !isValidEmail(email)) return 'junk';
   if(!phone || !isValidPhone(phone)) return 'junk';
-  const highRevenue = ['₹20–50 crore','₹50–100 crore','₹100–200 crore','Above ₹200 crore'];
+  const highRevenue = ['20_50cr','50_100cr','100cr_plus'];
   if(highRevenue.includes(revenue)) return 'qualified';
   return 'newsletter';
 }
