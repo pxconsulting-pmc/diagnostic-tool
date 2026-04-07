@@ -73,7 +73,7 @@ exports.handler = async (event) => {
   try {
     const result = await httpsPost(
       ODOO_BASE_URL,
-      '/json/2/crm.lead/create',
+      '/json/2/crm.lead/create?db=px-consulting',
       {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
