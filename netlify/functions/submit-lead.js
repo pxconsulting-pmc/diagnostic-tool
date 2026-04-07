@@ -125,13 +125,20 @@ exports.handler = async (event) => {
   }
 
   // ── Step 2: Create CRM lead via XML-RPC object endpoint ──
-  // Minimal fields first — isolate whether automation rule or custom field is the issue
   const leadData = {
-    name:         `[Diagnostic] ${payload.name}${payload.company ? ' — ' + payload.company : ''}`,
-    contact_name: payload.name,
-    email_from:   payload.email,
-    mobile:       payload.phone || '',
-    stage_id:     STAGE_ID,
+    name:            `[Diagnostic] ${payload.name}${payload.company ? ' — ' + payload.company : ''}`,
+    contact_name:    payload.name,
+    partner_name:    payload.company     || '',
+    email_from:      payload.email,
+    phone:           payload.phone       || '',
+    description:     payload.description || '',
+    stage_id:        STAGE_ID,
+    x_revenue_range: payload.revenue       || '',
+    x_whatsapp:      payload.phone         || '',
+    x_total_score:   payload.totalPct      || 0,
+    x_dim_scores:    payload.dimScoresText || '',
+    x_weakest_dim:   payload.weakestDim    || '',
+    x_qualification: payload.qualification || 'junk',
   };
 
   try {
