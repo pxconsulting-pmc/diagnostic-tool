@@ -1,56 +1,67 @@
 /* ═══════════════════════════════════════════════════════════════
    PX Consulting — Diagnostic Tool → Odoo CRM
-   Netlify Serverless Function
-
-   SETUP:
-   1. Netlify dashboard → Site configuration → Environment variables
-      Add: ODOO_API_KEY = your key from Odoo Settings → Users → API Keys
-
-   2. File lives at: netlify/functions/submit-lead.js
-
-   3. HTML calls /.netlify/functions/submit-lead
-      This function calls pxconsulting.odoo.com server-side — no CORS.
-
-   ODOO 19 API:
-   Uses the new JSON-2 endpoint: /json/2/<model>/<method>
-   Old /web/dataset/call_kw returns HTML in Odoo 19 — do not use.
-
-   ODOO FIELDS:
-   Standard:  name, contact_name, partner_name, email_from, mobile, description, stage_id
-   Custom:    x_revenue_range, x_whatsapp, x_total_score, x_dim_scores, x_weakest_dim, x_qualification
+   Netlify Serverless Function v3
    ═══════════════════════════════════════════════════════════════ */
 
-const ODOO_BASE_URL = 'https://pxconsulting.odoo.com';
+const https = require('https');
+
+const ODOO_BASE_URL = 'pxconsulting.odoo.com';
 const ODOO_DB       = 'px-consulting';
-const STAGE_ID      = 1; // "Score Delivered" — first stage in CRM pipeline
+const STAGE_ID      = 1;
+
+// Use Node's built-in https instead of fetch — works on all Netlify Node versions
+function httpsPost(hostname, path, headers, body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const options = {
+      hostname,
+      path,
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Length': Buffer.byteLength(data),
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let raw = '';
+      res.on('data', chunk => raw += chunk);
+      res.on('end', () => resolve({ status: res.statusCode, body: raw }));
+    });
+
+    req.on('error', reject);
+    req.write(data);
+    req.end();
+  });
+}
 
 exports.handler = async (event) => {
 
-  if(event.httpMethod !== 'POST'){
+  if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   let payload;
   try {
     payload = JSON.parse(event.body);
-  } catch(e) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON in request body' }) };
+  } catch (e) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
   const apiKey = process.env.ODOO_API_KEY;
-  if(!apiKey){
-    console.error('ODOO_API_KEY not set in Netlify environment variables.');
-    return { statusCode: 500, body: JSON.stringify({ error: 'Server config error — API key missing' }) };
+  if (!apiKey) {
+    console.error('ODOO_API_KEY not set');
+    return { statusCode: 500, body: JSON.stringify({ error: 'API key missing' }) };
   }
 
   const leadData = {
-    name:         `[Diagnostic] ${payload.name}${payload.company ? ' — ' + payload.company : ''}`,
-    contact_name: payload.name,
-    partner_name: payload.company || '',
-    email_from:   payload.email,
-    mobile:       payload.phone || '',
-    description:  payload.description || '',
-    stage_id:     STAGE_ID,
+    name:            `[Diagnostic] ${payload.name}${payload.company ? ' — ' + payload.company : ''}`,
+    contact_name:    payload.name,
+    partner_name:    payload.company    || '',
+    email_from:      payload.email,
+    mobile:          payload.phone      || '',
+    description:     payload.description || '',
+    stage_id:        STAGE_ID,
     x_revenue_range: payload.revenue       || '',
     x_whatsapp:      payload.phone         || '',
     x_total_score:   payload.totalPct      || 0,
@@ -60,45 +71,50 @@ exports.handler = async (event) => {
   };
 
   try {
-    const odooResponse = await fetch(`${ODOO_BASE_URL}/json/2/crm.lead/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const result = await httpsPost(
+      ODOO_BASE_URL,
+      '/json/2/crm.lead/create',
+      {
+        'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'DATABASE': ODOO_DB,
+        'DATABASE':      ODOO_DB,
       },
-      body: JSON.stringify({ args: [[leadData]] })
-    });
+      { args: [[leadData]] }
+    );
 
-    console.log(`Odoo response status: ${odooResponse.status}`);
-    const responseText = await odooResponse.text();
+    console.log(`Odoo HTTP status: ${result.status}`);
+    console.log(`Odoo raw response (first 500): ${result.body.substring(0, 500)}`);
 
-    if(responseText.trim().startsWith('<')){
-      console.error('Odoo returned HTML. First 300 chars:', responseText.substring(0, 300));
+    // Detect HTML response (auth failure / redirect)
+    if (result.body.trim().startsWith('<')) {
+      console.error('Odoo returned HTML — auth failure or wrong endpoint');
       return {
         statusCode: 500,
-        body: JSON.stringify({ success: false, error: 'Odoo returned HTML — check API key and DATABASE header' })
+        body: JSON.stringify({ success: false, error: 'Odoo returned HTML', preview: result.body.substring(0, 200) })
       };
     }
 
     let data;
     try {
-      data = JSON.parse(responseText);
-    } catch(e) {
-      console.error('Could not parse Odoo response:', responseText.substring(0, 300));
+      data = JSON.parse(result.body);
+    } catch (e) {
+      console.error('Could not parse Odoo response as JSON:', result.body.substring(0, 300));
       return { statusCode: 500, body: JSON.stringify({ success: false, error: 'Odoo response not valid JSON' }) };
     }
 
-    if(data.error){
+    if (data.error) {
       console.error('Odoo API error:', JSON.stringify(data.error));
       return {
         statusCode: 500,
-        body: JSON.stringify({ success: false, error: data.error.data?.message || data.error.message || JSON.stringify(data.error) })
+        body: JSON.stringify({
+          success: false,
+          error: data.error.data?.message || data.error.message || JSON.stringify(data.error)
+        })
       };
     }
 
     const leadId = data.result;
-    console.log(`Lead created. Odoo ID: ${leadId} | Name: ${payload.name} | Score: ${payload.totalPct}% | Qual: ${payload.qualification}`);
+    console.log(`✓ Lead created. Odoo ID: ${leadId} | ${payload.name} | ${payload.totalPct}% | ${payload.qualification}`);
 
     return {
       statusCode: 200,
@@ -106,8 +122,8 @@ exports.handler = async (event) => {
       body: JSON.stringify({ success: true, leadId })
     };
 
-  } catch(err) {
-    console.error('Fetch to Odoo failed:', err.message);
+  } catch (err) {
+    console.error('https request failed:', err.message);
     return { statusCode: 500, body: JSON.stringify({ success: false, error: err.message }) };
   }
 };
