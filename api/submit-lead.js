@@ -1,10 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    PX Consulting — Diagnostic Tool → Odoo CRM
    Vercel Serverless Function
-
-   SETUP:
-   Vercel dashboard → Project → Settings → Environment Variables
-   Add: ODOO_API_KEY = your Odoo API key
    ═══════════════════════════════════════════════════════════════ */
 
 const https = require('https');
@@ -15,13 +11,11 @@ const STAGE_ID = 1;
 
 function post(hostname, path, body) {
   return new Promise((resolve, reject) => {
-    const data = Buffer.from(body);
+    const data = Buffer.from(body, 'utf8');
     const req = https.request({
-      hostname,
-      path,
-      method: 'POST',
+      hostname, path, method: 'POST',
       headers: {
-        'Content-Type':   'text/xml',
+        'Content-Type':   'text/xml; charset=utf-8',
         'Content-Length': data.length,
       }
     }, (res) => {
@@ -35,37 +29,41 @@ function post(hostname, path, body) {
   });
 }
 
-function xmlCall(method, params) {
-  const encode = (v) => {
-    if (v === null || v === undefined) return '<value><boolean>0</boolean></value>';
-    if (typeof v === 'boolean')  return `<value><boolean>${v?1:0}</boolean></value>`;
-    if (typeof v === 'number')   return `<value><int>${v}</int></value>`;
-    if (typeof v === 'string')   return `<value><string>${escXml(v)}</string></value>`;
-    if (Array.isArray(v))        return `<value><array><data>${v.map(encode).join('')}</data></array></value>`;
-    if (typeof v === 'object') {
-      const members = Object.entries(v)
-        .filter(([,val]) => val !== undefined && val !== null)
-        .map(([k,val]) => `<member><n>${escXml(k)}</n>${encode(val)}</member>`)
-        .join('');
-      return `<value><struct>${members}</struct></value>`;
-    }
-    return `<value><string>${escXml(String(v))}</string></value>`;
-  };
-  return `<?xml version="1.0"?>
-<methodCall>
-  <methodName>${method}</methodName>
-  <params>${params.map(p => `<param>${encode(p)}</param>`).join('')}</params>
-</methodCall>`;
-}
-
-function escXml(s) {
+function esc(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
 
+function encodeValue(v) {
+  if (v === null || v === undefined) return '<value><string></string></value>';
+  if (typeof v === 'boolean')  return '<value><boolean>' + (v?1:0) + '</boolean></value>';
+  if (typeof v === 'number' && Number.isInteger(v)) return '<value><int>' + v + '</int></value>';
+  if (typeof v === 'number')   return '<value><double>' + v + '</double></value>';
+  if (typeof v === 'string')   return '<value><string>' + esc(v) + '</string></value>';
+  if (Array.isArray(v)) {
+    return '<value><array><data>' + v.map(encodeValue).join('') + '</data></array></value>';
+  }
+  if (typeof v === 'object') {
+    const members = Object.entries(v)
+      .map(function(entry) {
+        return '<member><name>' + esc(entry[0]) + '</name>' + encodeValue(entry[1]) + '</member>';
+      }).join('');
+    return '<value><struct>' + members + '</struct></value>';
+  }
+  return '<value><string>' + esc(String(v)) + '</string></value>';
+}
+
+function xmlCall(method, params) {
+  const paramXml = params.map(function(p) {
+    return '<param>' + encodeValue(p) + '</param>';
+  }).join('');
+  return '<?xml version="1.0" encoding="utf-8"?><methodCall><methodName>' +
+    esc(method) + '</methodName><params>' + paramXml + '</params></methodCall>';
+}
+
 function parseXmlInt(xml) {
-  const m = xml.match(/<int>(\d+)<\/int>/) || xml.match(/<i4>(\d+)<\/i4>/);
+  var m = xml.match(/<int>(\d+)<\/int>/) || xml.match(/<i4>(\d+)<\/i4>/);
   return m ? parseInt(m[1]) : null;
 }
 
@@ -76,8 +74,8 @@ export default async function handler(req, res) {
   }
 
   const payload = req.body;
-  if (!payload) {
-    return res.status(400).json({ error: 'Empty request body' });
+  if (!payload || !payload.name || !payload.email) {
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
   const apiKey = process.env.ODOO_API_KEY;
@@ -87,69 +85,68 @@ export default async function handler(req, res) {
   }
 
   // Step 1 — Authenticate
-  let uid;
+  var uid;
   try {
-    const authXml = xmlCall('authenticate', [
+    var authXml = xmlCall('authenticate', [
       ODOO_DB,
       'vinod.pandita@pxconsulting.in',
       apiKey,
       {}
     ]);
-    const authRes = await post(ODOO_URL, '/xmlrpc/2/common', authXml);
-    console.log(`Auth status: ${authRes.status}`);
+    var authRes = await post(ODOO_URL, '/xmlrpc/2/common', authXml);
+    console.log('Auth status: ' + authRes.status);
     if (authRes.body.includes('<fault>')) {
       throw new Error('Auth fault: ' + authRes.body.substring(0, 300));
     }
     uid = parseXmlInt(authRes.body);
-    if (!uid) throw new Error('No uid returned — check API key');
-    console.log(`Authenticated. UID: ${uid}`);
+    if (!uid) throw new Error('No uid returned — check API key and username');
+    console.log('Authenticated. UID: ' + uid);
   } catch (err) {
     console.error('Auth error:', err.message);
-    return res.status(500).json({ success: false, error: 'Odoo auth failed: ' + err.message });
+    return res.status(500).json({ success: false, error: 'Auth failed: ' + err.message });
   }
 
-  // Step 2 — Create lead
-  // Build lead — only include fields with actual values to avoid XML struct errors
-  const rawLead = {
-    name:            `[Diagnostic] ${payload.name}${payload.company ? ' — ' + payload.company : ''}`,
-    contact_name:    payload.name,
-    partner_name:    payload.company     || '',
-    email_from:      payload.email,
-    phone:           payload.phone       || '',
-    description:     payload.description || '',
-    stage_id:        STAGE_ID,
-    x_revenue_range: payload.revenue       || '',
-    x_whatsapp:      payload.phone         || '',
-    x_total_score:   payload.totalPct      || 0,
-    x_dim_scores:    payload.dimScoresText || '',
-    x_weakest_dim:   payload.weakestDim    || '',
-    x_qualification: payload.qualification || 'unqualified',
+  // Step 2 — Create CRM lead
+  var leadData = {
+    name:         '[Diagnostic] ' + payload.name + (payload.company ? ' — ' + payload.company : ''),
+    contact_name: payload.name,
+    email_from:   payload.email,
+    stage_id:     STAGE_ID,
   };
 
-  // Strip empty strings — they cause malformed XML structs
-  const leadData = Object.fromEntries(
-    Object.entries(rawLead).filter(([, v]) => v !== '' && v !== null && v !== undefined)
-  );
+  // Only add optional fields if they have values
+  if (payload.company)       leadData.partner_name    = payload.company;
+  if (payload.phone)         leadData.phone           = payload.phone;
+  if (payload.phone)         leadData.x_whatsapp      = payload.phone;
+  if (payload.description)   leadData.description     = payload.description;
+  if (payload.revenue)       leadData.x_revenue_range = payload.revenue;
+  if (payload.dimScoresText) leadData.x_dim_scores    = payload.dimScoresText;
+  if (payload.weakestDim)    leadData.x_weakest_dim   = payload.weakestDim;
+  if (payload.qualification) leadData.x_qualification = payload.qualification;
+  if (payload.totalPct !== undefined && payload.totalPct !== null) {
+    leadData.x_total_score = parseInt(payload.totalPct) || 0;
+  }
 
   try {
-    const createXml = xmlCall('execute_kw', [
+    var createXml = xmlCall('execute_kw', [
       ODOO_DB, uid, apiKey,
       'crm.lead', 'create',
-      [leadData], {}
+      [leadData]
     ]);
-    const createRes = await post(ODOO_URL, '/xmlrpc/2/object', createXml);
-    console.log(`Create status: ${createRes.status}`);
+
+    var createRes = await post(ODOO_URL, '/xmlrpc/2/object', createXml);
+    console.log('Create status: ' + createRes.status);
 
     if (createRes.body.includes('<fault>')) {
-      console.error('Create fault:', createRes.body.substring(0, 2000));
-      throw new Error('Create fault: ' + createRes.body.substring(0, 500));
+      console.error('Create fault:', createRes.body.substring(0, 3000));
+      throw new Error(createRes.body.substring(0, 500));
     }
 
-    const leadId = parseXmlInt(createRes.body);
-    if (!leadId) throw new Error('No lead ID returned');
+    var leadId = parseXmlInt(createRes.body);
+    if (!leadId) throw new Error('No lead ID in response: ' + createRes.body.substring(0, 200));
 
-    console.log(`✓ Lead created. Odoo ID: ${leadId} | ${payload.name} | ${payload.totalPct}% | ${payload.qualification}`);
-    return res.status(200).json({ success: true, leadId });
+    console.log('Lead created. Odoo ID: ' + leadId + ' | ' + payload.name + ' | ' + payload.totalPct + '% | ' + payload.qualification);
+    return res.status(200).json({ success: true, leadId: leadId });
 
   } catch (err) {
     console.error('Create error:', err.message);
