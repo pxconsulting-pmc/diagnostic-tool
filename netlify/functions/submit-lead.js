@@ -147,10 +147,10 @@ exports.handler = async (event) => {
 
     const createRes = await post(ODOO_URL, '/xmlrpc/2/object', createXml);
     console.log(`Create status: ${createRes.status}`);
-    console.log(`Create response (first 300): ${createRes.body.substring(0, 2000)}`);
+    console.log(`Create response (first 300): ${createRes.body.substring(0, 5000)}`);
 
     if (createRes.body.includes('<fault>')) {
-      throw new Error('Create fault: ' + createRes.body.substring(0, 2000));
+      throw new Error('Create fault: ' + createRes.body.substring(0, 5000));
     }
 
     const leadId = parseXmlInt(createRes.body);
