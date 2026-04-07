@@ -76,10 +76,11 @@ exports.handler = async (event) => {
       '/json/2/crm.lead/create',
       {
         'Content-Type':  'application/json',
+        'Host':          'px-consulting.odoo.com',
         'Authorization': `Bearer ${apiKey}`,
         'DATABASE':      ODOO_DB,
       },
-      { database: ODOO_DB, args: [[leadData]] }
+      { args: [[leadData]] }
     );
 
     console.log(`Odoo HTTP status: ${result.status}`);
