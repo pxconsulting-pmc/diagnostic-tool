@@ -51,12 +51,6 @@ const VALID_QUALS    = ['qualified','unqualified','junk'];
 function validatePayload(p) {
   const errors = [];
 
-  // Enrichment update — minimal validation
-  if (p._action === 'update') {
-    if (!p.leadId || typeof p.leadId !== 'number') errors.push('Invalid leadId for update');
-    return errors;
-  }
-
   if (!p.name || typeof p.name !== 'string' || p.name.trim().length < 2) {
     errors.push('Invalid name');
   }
@@ -212,34 +206,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, error: 'Authentication failed' });
   }
 
-  // ── ENRICHMENT UPDATE (patch existing lead) ─────────────────
-  if (payload._action === 'update') {
-    try {
-      const updateData = {};
-      if (payload.industry) updateData.x_industry  = payload.industry;
-      if (payload.teamSize)  updateData.x_team_size = payload.teamSize;
-
-      if (Object.keys(updateData).length === 0) {
-        return res.status(200).json({ success: true, skipped: true });
-      }
-
-      var updateXml = xmlCall('execute_kw', [
-        ODOO_DB, uid, apiKey,
-        'crm.lead', 'write',
-        [[payload.leadId], updateData]
-      ]);
-      var updateRes = await post(ODOO_URL, '/xmlrpc/2/object', updateXml);
-      if (updateRes.body.includes('<fault>')) {
-        throw new Error(updateRes.body.substring(0, 300));
-      }
-      console.log('Enrichment updated. Lead ID: ' + payload.leadId);
-      return res.status(200).json({ success: true, updated: true });
-    } catch (err) {
-      console.error('Enrichment update error:', err.message);
-      return res.status(500).json({ success: false, error: 'Enrichment update failed' });
-    }
-  }
-
   // Build lead record
   var leadData = {
     name:         '[Diagnostic] ' + payload.name.trim() + (payload.company ? ' — ' + payload.company.trim() : ''),
@@ -256,8 +222,6 @@ export default async function handler(req, res) {
   if (payload.dimScoresText) leadData.x_dim_scores    = payload.dimScoresText;
   if (payload.weakestDim)    leadData.x_weakest_dim   = payload.weakestDim;
   if (payload.qualification) leadData.x_qualification = payload.qualification;
-  if (payload.industry)      leadData.x_industry      = payload.industry;
-  if (payload.teamSize)      leadData.x_team_size     = payload.teamSize;
   if (payload.totalPct !== undefined && payload.totalPct !== null) {
     leadData.x_total_score = parseInt(payload.totalPct) || 0;
   }
