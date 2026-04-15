@@ -240,7 +240,7 @@ body{
 }
 
 .question-sub{
-  font-size:0.83rem;color:var(--muted);
+  font-size:0.92rem;color:var(--muted);
   margin-bottom:2.25rem;line-height:1.65;
   font-style:italic;
 }
@@ -289,7 +289,7 @@ body{
 }
 
 .option-text{
-  font-size:0.87rem;color:var(--ink2);
+  font-size:0.95rem;color:var(--ink2);
   line-height:1.5;
 }
 
@@ -363,29 +363,29 @@ body{
 }
 
 .gate-box p{
-  font-size:0.87rem;color:var(--muted);
+  font-size:0.95rem;color:var(--muted);
   line-height:1.75;margin-bottom:2rem;
 }
 
 .gate-box p strong{color:var(--ink2);font-weight:400;}
 
-.form-row{margin-bottom:1.1rem;}
+.form-row{margin-bottom:1.25rem;}
 
 .form-label{
   display:block;
   font-family:'DM Mono',monospace;
-  font-size:0.52rem;letter-spacing:0.25em;
+  font-size:0.65rem;letter-spacing:0.18em;
   text-transform:uppercase;color:var(--muted);
   margin-bottom:0.45rem;
 }
 
 .form-input,.form-select{
   width:100%;
-  padding:0.78rem 1rem;
+  padding:0.85rem 1rem;
   border:1px solid var(--border);
   background:var(--bg3);
   font-family:'DM Sans',sans-serif;
-  font-size:0.88rem;color:var(--ink);
+  font-size:1rem;color:var(--ink);
   outline:none;
   transition:border-color 0.15s;
 }
@@ -409,7 +409,7 @@ body{
 }
 
 .gate-privacy{
-  font-size:0.7rem;color:var(--muted);
+  font-size:0.78rem;color:var(--muted);
   margin-top:1.25rem;line-height:1.55;
   text-align:center;
   opacity:0.7;
@@ -624,7 +624,7 @@ body{
 }
 
 .dim-insight{
-  font-size:0.8rem;color:var(--muted);
+  font-size:0.88rem;color:var(--muted);
   line-height:1.7;
   font-style:italic;
 }
@@ -651,13 +651,13 @@ body{
 }
 
 .gap-content strong{
-  display:block;font-size:0.86rem;
+  display:block;font-size:0.92rem;
   font-weight:500;color:var(--cream);
   margin-bottom:0.3rem;
 }
 
 .gap-content p{
-  font-size:0.8rem;color:var(--muted);
+  font-size:0.87rem;color:var(--muted);
   line-height:1.65;
 }
 
@@ -677,7 +677,7 @@ body{
 }
 
 .cta-box p{
-  font-size:0.85rem;color:var(--muted);
+  font-size:0.92rem;color:var(--muted);
   line-height:1.75;margin-bottom:1.5rem;
 }
 
@@ -700,7 +700,7 @@ body{
   border:1px solid var(--border2);
   background:var(--bg2);
   padding:1.5rem;
-  font-size:0.82rem;color:var(--muted);
+  font-size:0.88rem;color:var(--muted);
   line-height:1.75;
 }
 
@@ -765,88 +765,7 @@ body{
   .welcome-footer{flex-direction:column;gap:0.25rem;text-align:center;}
 }
 
-/* ─── ENRICHMENT FORM ─── */
-.enrichment-box{
-  border:1px solid var(--border);
-  background:var(--bg2);
-  padding:2rem 2.25rem;
-  margin:2.5rem 0 1.5rem;
-}
 
-.enrichment-box .enrichment-eyebrow{
-  font-family:'DM Mono',monospace;
-  font-size:0.52rem;letter-spacing:0.28em;
-  text-transform:uppercase;color:var(--gold);
-  margin-bottom:0.75rem;opacity:0.7;
-}
-
-.enrichment-box h3{
-  font-family:'Playfair Display',serif;
-  font-size:1.2rem;font-weight:700;
-  line-height:1.3;margin-bottom:0.5rem;
-  color:var(--cream);
-}
-
-.enrichment-box p{
-  font-size:0.83rem;color:var(--muted);
-  line-height:1.7;margin-bottom:1.5rem;
-}
-
-.enrichment-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:0.85rem;
-  margin-bottom:1.25rem;
-}
-
-@media(max-width:520px){
-  .enrichment-grid{grid-template-columns:1fr;}
-}
-
-.enrichment-submitted{
-  display:none;
-  padding:1rem 1.25rem;
-  background:rgba(90,184,122,0.07);
-  border:1px solid rgba(90,184,122,0.18);
-  font-family:'DM Mono',monospace;
-  font-size:0.58rem;letter-spacing:0.15em;
-  text-transform:uppercase;color:#5ab87a;
-  text-align:center;
-}
-
-.btn-enrich{
-  width:100%;
-  padding:0.85rem 1.5rem;
-  background:transparent;
-  border:1px solid var(--gold-border);
-  color:var(--gold);
-  font-family:'DM Sans',sans-serif;
-  font-size:0.82rem;font-weight:500;
-  letter-spacing:0.04em;
-  text-transform:uppercase;
-  cursor:pointer;
-  transition:all 0.2s;
-}
-
-.btn-enrich:hover{
-  background:var(--gold-bg);
-  border-color:var(--gold);
-}
-
-.enrich-skip{
-  display:block;
-  text-align:center;
-  margin-top:0.75rem;
-  font-size:0.72rem;color:var(--muted);
-  cursor:pointer;
-  text-decoration:underline;
-  text-underline-offset:3px;
-  opacity:0.6;
-  background:none;border:none;
-  font-family:'DM Sans',sans-serif;
-}
-
-.enrich-skip:hover{opacity:1;}
 </style>
 </head>
 <body>
@@ -1000,44 +919,8 @@ body{
       <div class="gaps" id="priority-gaps"></div>
     </div>
 
-    <!-- ENRICHMENT FORM — shown before booking CTA -->
-    <div class="enrichment-box fade-in" id="enrichment-box" style="animation-delay:0.3s">
-      <div class="enrichment-eyebrow">One last thing</div>
-      <h3>Help VP prepare for your conversation.</h3>
-      <p>Two quick details so your results review is as specific as possible to your situation.</p>
-      <div class="enrichment-grid">
-        <div class="form-row" style="margin-bottom:0">
-          <label class="form-label">Industry</label>
-          <select class="form-select" id="enrich-industry">
-            <option value="">Select industry</option>
-            <option value="Manufacturing">Manufacturing</option>
-            <option value="Auto Components">Auto Components</option>
-            <option value="Textiles & Apparel">Textiles &amp; Apparel</option>
-            <option value="FMCG & Packaging">FMCG &amp; Packaging</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Hospitality">Hospitality</option>
-            <option value="Other">Any Other</option>
-          </select>
-        </div>
-        <div class="form-row" style="margin-bottom:0">
-          <label class="form-label">Team size (staff)</label>
-          <select class="form-select" id="enrich-teamsize">
-            <option value="">Select range</option>
-            <option value="under_10">Below 10</option>
-            <option value="10_25">10–25</option>
-            <option value="25_50">25–50</option>
-            <option value="50_100">50–100</option>
-            <option value="100_plus">Above 100</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn-enrich" onclick="submitEnrichment()">Save and continue →</button>
-      <button class="enrich-skip" onclick="skipEnrichment()">Skip for now</button>
-      <div class="enrichment-submitted" id="enrichment-submitted">Details saved — thank you.</div>
-    </div>
-
-    <!-- CTA BOX — shown after enrichment or skip -->
-    <div class="fade-in cta-box" id="cta-box" style="animation-delay:0.4s;display:none">
+    <!-- CTA BOX -->
+    <div class="fade-in cta-box" style="animation-delay:0.3s">
       <h3>Want to understand exactly what these findings mean for your business?</h3>
       <p>VP will personally review your diagnostic results with you in a free 45-minute conversation — no pitch, just clarity on what your scores reveal and what to prioritise first.</p>
       <a href="https://px-consulting.odoo.com/book/e71f3249" target="_blank" rel="noopener" class="btn-cta">
@@ -1045,7 +928,7 @@ body{
       </a>
     </div>
 
-    <div class="next-steps-box fade-in" style="animation-delay:0.5s">
+    <div class="next-steps-box fade-in" style="animation-delay:0.4s">
       <strong>What happens next:</strong> A copy of this report has been sent to your email. If you don't see it in the next few minutes, check your Promotions or Spam folder. If you choose to book a review call, VP will have read your specific scores before the conversation begins — so the 45 minutes is spent entirely on your situation, not on general advice.
     </div>
 
@@ -1556,8 +1439,8 @@ function animateScore(totalPct){
    - x_dim_scores       (Char)      — all 5 dimension scores as text
    - x_weakest_dim      (Char)      — name of lowest scoring dimension
    - x_qualification    (Selection) — qualified / unqualified / junk
-   - x_industry         (Char)      — industry from enrichment form
-   - x_team_size        (Char)      — team size from enrichment form
+   - x_industry         (Char)      — industry (collected on booking form)
+   - x_team_size        (Char)      — team size (collected on booking form)
 
    QUALIFICATION LOGIC:
    - Revenue >₹10 Cr (10_25cr and above) + valid phone + valid email → "qualified"
@@ -1607,15 +1490,13 @@ async function submitToOdoo(user, dimScores, totalPct, scoreLabel){
     company:       user.company,
     email:         user.email,
     phone:         user.phone,
-    revenue:       user.revenue,          // Odoo key e.g. '10_25cr'
+    revenue:       user.revenue,
     totalPct,
     scoreLabel,
     dimScoresText,
     weakestDim,
     qualification,
     description,
-    industry:      user.industry || '',
-    teamSize:      user.teamSize || '',
   };
 
   try {
@@ -1629,8 +1510,6 @@ async function submitToOdoo(user, dimScores, totalPct, scoreLabel){
 
     if(data.success){
       console.log('PX Diagnostic: Lead created in Odoo. ID:', data.leadId);
-      // Store lead ID for enrichment update
-      window._pxLeadId = data.leadId;
     } else {
       console.error('PX Diagnostic: Odoo submission failed:', data.error);
     }
@@ -1675,59 +1554,6 @@ ${gaps.map((g,i) => `  ${i+1}. ${g.name} — ${g.pct}%`).join('\n')}
 Source: PX Business Health Check
 Lead type: Inbound — diagnostic completion
 Next action: Check x_qualification. If qualified, VP personal follow-up within 24h.`;
-}
-/* ═══════════════════════════════════════════════════════════════
-   ENRICHMENT FORM — post-results, before booking CTA
-   ═══════════════════════════════════════════════════════════════ */
-
-async function submitEnrichment(){
-  const industry = document.getElementById('enrich-industry').value;
-  const teamSize = document.getElementById('enrich-teamsize').value;
-
-  // Show CTA regardless of whether API call succeeds
-  revealCTA();
-
-  if(!industry && !teamSize) return;
-
-  // Show confirmation
-  document.getElementById('enrichment-submitted').style.display = 'block';
-
-  // Update userData for any future reference
-  userData.industry = industry;
-  userData.teamSize = teamSize;
-
-  // If we have a lead ID, patch the record in Odoo
-  if(window._pxLeadId){
-    try {
-      await fetch('/api/submit-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          _action:  'update',
-          leadId:   window._pxLeadId,
-          industry: industry,
-          teamSize: teamSize,
-        })
-      });
-    } catch(err){
-      // Silent fail — enrichment is a nice-to-have
-      console.warn('PX Diagnostic: Enrichment update failed silently:', err.message);
-    }
-  }
-}
-
-function skipEnrichment(){
-  revealCTA();
-}
-
-function revealCTA(){
-  const box = document.getElementById('enrichment-box');
-  const cta = document.getElementById('cta-box');
-  if(box) box.style.display = 'none';
-  if(cta){
-    cta.style.display = 'block';
-    cta.style.animation = 'fadeUp 0.4s ease forwards';
-  }
 }
 
 </script>
